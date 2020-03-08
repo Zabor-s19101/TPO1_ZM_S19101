@@ -1,7 +1,6 @@
 package zad1;
 
 
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.channels.FileChannel;
@@ -18,22 +17,26 @@ public class Futil {
             FileChannel resChannel = FileChannel.open(Paths.get(resFileName), StandardOpenOption.WRITE, StandardOpenOption.CREATE);
             FileVisitor<Path> myFileVisitor = new SimpleFileVisitor<Path>() {
                 @Override
-                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
-                    FileChannel readChannel = FileChannel.open(file, StandardOpenOption.READ);
-                    ByteBuffer byteBuffer = ByteBuffer.allocate((int)readChannel.size());
-                    readChannel.read(byteBuffer);
-                    byteBuffer.flip();
-                    CharBuffer charBuffer = decode.decode(byteBuffer);
-                    byteBuffer = encode.encode(charBuffer);
-                    resChannel.write(byteBuffer);
-                    readChannel.close();
+                public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) {
+                    try {
+                        FileChannel readChannel = FileChannel.open(file, StandardOpenOption.READ);
+                        ByteBuffer byteBuffer = ByteBuffer.allocate((int)readChannel.size());
+                        readChannel.read(byteBuffer);
+                        byteBuffer.flip();
+                        CharBuffer charBuffer = decode.decode(byteBuffer);
+                        byteBuffer = encode.encode(charBuffer);
+                        resChannel.write(byteBuffer);
+                        readChannel.close();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                     return FileVisitResult.CONTINUE;
                 }
             };
             Path path = Paths.get(dirName);
             Files.walkFileTree(path, myFileVisitor);
             resChannel.close();
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
